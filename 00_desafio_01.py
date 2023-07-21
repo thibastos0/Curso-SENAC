@@ -1,127 +1,143 @@
-class Cliente:
-    def __init__(self, nome, id, senha, saldo, limite, extrato='', numero_saques=0):
-        self.nome = nome
-        self.id = id
-        self.senha = senha
-        self.saldo = saldo
-        self.limite = limite
-        self.extrato = extrato
-        self.numero_saques = numero_saques
+def menu():
+    menu = """
+    ============ M E N U ============
+    [d]  Depositar
+    [s]  Sacar
+    [e]  Extrato
+    [nc] Nova conta
+    [lc] Listar contas
+    [nu] Novo usuário
+    [q]  Sair
 
-    def depositar(self, valor):
-        if valor > 0:
-            self.saldo += valor
-            self.extrato += (f"Depósito: R$ {valor:.2f} \n")
-            print("Depósito realizado com sucesso!")
-        else:
-            print("Operação falhou! O valor informado é inválido!")
+    => """
+    return input(menu)
 
-    def sacar(self, valor):
-        if valor <= self.saldo and valor <= self.limite and self.numero_saques < LIMITE_SAQUES and valor > 0:
-            self.saldo -= valor
-            self.extrato += (f"Saque: R$ {valor:.2f} \n")
-            self.numero_saques += 1
-            print("Saque realizado com sucesso! Total de operações de saque no dia: ", self.numero_saques)            
-        elif valor > self.saldo:
-            print("Operação falhou. Você não tem saldo suficiente.")
-        elif valor > self.limite:
-            print("Operação falhou. O valor do saque excede o limite.")
-        elif self.numero_saques >= LIMITE_SAQUES:
-            print("Operação falou. Número máximo de saques excedidos.")
-        elif valor < 0:
-            print("Operação falhou! O valor informado é inválido!")
-        else:
-            print("Algo deu errado!")
-    
-    def exibir_extrato(self):
-        print("\n==========EXTRATO==========")        
-        print(" Não foram realizadas movimentações. " if not self.extrato else self.extrato)        
+def depositar(saldo, valor, extrato, /):
+    if valor > 0:
+        saldo += valor
+        extrato += f"Depósito: R$ {valor:.2f}\n"
+        print("=== Depósito realizado com sucesso! ===") 
+    else:
+        print("@@@ Operação Falhou! O valor informado é inválido! @@@") 
 
+    return saldo, extrato
 
-# class Conta(Cliente):
-#     def __init__(self, nome, id, senha, saldo, limite, extrato='', numero_saques=0, cheque_especial=0):
-#         super().__init__(nome, id, senha, saldo, limite, extrato, numero_saques)        
-#         self.cheque_especial = cheque_especial
+def saque(*, saldo, valor, extrato, limite, numero_saques, LIMITE_SAQUES):
+    excedeu_saldo = valor > saldo
+    excedeu_limite = valor > limite
+    excedeu_saques = numero_saques >= LIMITE_SAQUES
 
-def identificar_cliente():
-    return int(input("Informe sua id de usuário: "))
-    
-def senha_cliente():
-    return int(input("Informe sua senha: "))
+    if excedeu_saldo:
+        print(" @@@ Operação Falhou. Você não tem saldo suficiente! @@@")
 
+    elif excedeu_limite:
+        print(" @@@ Operação Falhou. O valor do saque excede o limite. @@@")
 
-menu = """
-==============
-[d] Depositar
-[s] Sacar
-[e] Extrato
-[q] Sair
-[z] Encerrar
-==============
-=>\r
-"""
+    elif excedeu_saques:
+        print("@@@ Operação Falhou. Número máximo de saques excedidos.@@@ ")
 
-LIMITE_SAQUES = 3
-cliente = [
-    Cliente('Cliente Um', 0, 1111, 0, 500), 
-    Cliente('Cliente Dois', 1, 2222, 0, 1000), 
-    Cliente('Cliente Três', 2, 3333, 0, 100)]
-
-operacao = 'q'
-
-# conta = [
-#     ('universitaria', Conta('Cliente Um', 0, 1111, 0, 500, 500)),
-#     ('especial', Conta('Cliente Dois', 1, 2222, 0, 1000, 1000)),
-#     ('universitaria', Conta('Cliente Três', 2, 3333, 0, 100, 500)),
-# ]
-
-# print(conta[0][1].cheque_especial)
-
-while True:
-  
-    if operacao == "q":
-        
-        id = identificar_cliente()
-        if id > len(cliente):
-            print("Usuário não cadastrado!")
-            continue
-
-        senha = senha_cliente()
-        if senha != cliente[id].senha:
-            print("Senha inválida!")
-            continue
-        else:
-            print("Cliente identificado!")
-            print(f"Bem-vindo, {cliente[id].nome}!")                       
-    
-    elif operacao == "d":
-        
-        valor = float(input("Informe o valor do depósito: "))
-        cliente[id].depositar(valor)
-               
-    elif operacao == "s":
-
-        valor = float(input("Informe o valor do saque: "))
-        cliente[id].sacar(valor)       
-            
-    elif operacao == "e":
-        
-        cliente[id].exibir_extrato()
-
-    elif operacao == "z":
-        print("Agradecemos a preferência")
-        break
+    elif valor > 0:
+        saldo -= valor
+        extrato += f"Saque: R$ {valor:.2f}\n"
+        print("=== Saque realizado com sucesso! ===")
+        numero_saques += 1
 
     else:
-        print("Opção Inválida!")
-        operacao = 'z'
-        continue  
+        print("@@@ Operação Falhou! O valor informado é inválido! @@@")
 
-    print("===========SALDO===========")    
-    print(f"\nSaldo atualizado: R$ {cliente[id].saldo:.2f}")
-    print("\n===========================")
+    return saldo, extrato, numero_saques
 
-    operacao = input(menu)
+def exibir_extrato(saldo, /, *, extrato):
+    print("\n===========EXTRATO===========")
+    print(f"\nSaldo: R$ {saldo:.2f}")
+    print("Não foram realizadas movimentações." if extrato == "" else extrato)
+    print("\n=============================")
 
-else:
-    print("Erro Fatal!")
+# O programa deve armazenar os usuários em uma lista. Um usuário é composto por: 
+# nome, data de nascimento, cpf e endereço. O endereço é uma string com o formato:logradouro, 
+# nro - bairro - cidade/sigla do estado. 
+# Deve ser armazenado somente os números do CPF. Não podemos cadastrar 2 usuários com o mesmo CPF.
+
+def criar_usuario():
+    cpf = input("Informe o CPF (Somente números): ")
+    usuario = filtrar_usuario(cpf)
+
+    if usuario:
+        print("@@@ Já existe um usuário com esse CPF @@@")
+    
+    nome = input("Infome o nome completo: ")
+    data_de_nascimento = input("Informe a data de nascimento (dd-mm-aaaa): ")
+    endereco = input("Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ")
+    
+    print(" === Usuário criado com sucesso! ===")
+    
+def criar_conta():
+    cpf = input("Informe o CPF do usuário: ")
+    usuario = filtrar_usuario(cpf)
+
+    if usuario:
+        print(" === Conta criada com sucesso === ")
+        return {"Nome": nome, "Data-de-Nascimento": data_de_nascimento, "Endereço": endereco}
+    else:
+        print("@@@ Usuário não encontrado. Favor cadastrar usuário! @@@")
+
+def filtrar_usuario(cpf):
+   usuarios_filtrados = [usuario for usuario in usuarios if usuarios['cpf'] == cpf] # list comprehension
+   return usuarios_filtrados[0] if usuarios_filtrados else None
+
+def listar_contas():
+    pass
+
+def main():
+    LIMITE_SAQUES = 3
+    AGENCIA = "0001"
+
+    saldo = 0
+    limite = 500
+    extrato = ""
+    numero_saques = 0
+    usuarios = []
+    contas = []
+
+    while True:
+        opcao = menu()
+
+        if opcao == 'd':
+            valor = float(input("Informe o valor do depósito: "))
+            saldo, extrato = depositar(saldo, valor, extrato)
+            
+        elif opcao == 's':
+            valor = float(input("Informe o valor do saque: "))
+            saldo, extrato, numero_saques = saque(saldo=saldo, valor=valor, extrato=extrato, limite=limite, numero_saques=numero_saques, LIMITE_SAQUES=LIMITE_SAQUES)
+            
+        elif opcao == 'e':
+            exibir_extrato(saldo, extrato)
+
+        elif opcao == 'nc':
+            criar_conta()
+        
+        elif opcao == 'lc':
+            listar_contas()
+        
+        elif opcao == 'nu':
+            criar_usuario()
+
+        elif opcao == 'q':
+            print("Agradecemos a preferência!")
+            break
+
+        else:
+            print("Opção Inválida, por favor seleciona novamente a operação desejada.")            
+            continue 
+
+        print("\n===========SALDO===========")
+        print(f"\nSeu saldo atual é: R$ {saldo:.2f}")        
+        print("\n=============================")
+
+
+if __name__ == '__main__': main()
+
+
+
+
+
