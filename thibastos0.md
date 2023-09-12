@@ -1,4 +1,4 @@
-# **Thiago Bastos** \
+# **Thiago Bastos**
 
 ---
 > Pequena é a parte da vida que vivemos, pois todo restante não é vida mas tempo.
